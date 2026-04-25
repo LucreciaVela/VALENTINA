@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aventura Matemática - Olimpiadas de Lógica</title>
+  <style>
+    :root {
+      --fondo: #f6fbff;
+      --tarjeta: #ffffff;
+      --primario: #3a86ff;
+      --secundario: #8338ec;
+      --acento: #ffbe0b;
+      --texto: #123;
+      --ok: #0f9d58;
+      --error: #d93025;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Trebuchet MS", "Segoe UI", sans-serif; background: radial-gradient(circle at top, #ffffff 0%, var(--fondo) 50%, #e7f2ff 100%); color: var(--texto); min-height: 100vh; }
+    .contenedor { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .hero { background: linear-gradient(135deg, var(--primario), var(--secundario)); color: #fff; padding: 24px; border-radius: 20px; box-shadow: 0 10px 25px rgba(58,134,255,0.25); margin-bottom: 20px; }
+    .hero h1 { margin-top: 0; font-size: 1.9rem; }
+    .estado { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 16px 0 22px; }
+    .estado .tarjeta { background: var(--tarjeta); border-radius: 14px; padding: 14px; border: 2px solid #e6f0ff; font-weight: bold; }
+    details { background: var(--tarjeta); border: 2px solid #d9e7ff; border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+    summary { cursor: pointer; list-style: none; padding: 16px; font-size: 1.1rem; font-weight: bold; background: linear-gradient(90deg, #f5f9ff, #ffffff); border-bottom: 1px solid #edf3ff; }
+    summary::before { content: "🧭 "; }
+    .mision { padding: 16px; }
+    .pregunta { font-weight: bold; margin-bottom: 10px; }
+    .opciones { display: grid; gap: 8px; margin-bottom: 12px; }
+    label { display: flex; gap: 8px; align-items: center; background: #f8fbff; border-radius: 10px; padding: 8px 10px; border: 1px solid #e7efff; }
+    .respuesta-num { width: 100%; max-width: 220px; padding: 8px; border-radius: 10px; border: 1px solid #c3d7ff; font-size: 1rem; margin-bottom: 12px; }
+    button { background: var(--primario); color: white; border: none; border-radius: 999px; padding: 9px 16px; font-weight: bold; cursor: pointer; margin-right: 8px; }
+    button:hover { filter: brightness(1.06); }
+    .pista { background: #fff8e3; border-left: 4px solid var(--acento); padding: 8px 10px; border-radius: 10px; margin-top: 10px; display: none; }
+    .resultado { margin-top: 10px; font-weight: bold; min-height: 24px; }
+    .ok { color: var(--ok); }
+    .error { color: var(--error); }
+    .final { background: #f3fff8; border: 2px dashed #8ad5a9; border-radius: 14px; padding: 14px; margin-top: 16px; display: none; }
+    .creditos { text-align: center; margin-top: 20px; opacity: 0.75; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <main class="contenedor">
+    <section class="hero">
+      <h1>🏰 Aventura Matemática de la Isla Lógica</h1>
+      <p>Hola, exploradora. En cada misión resolverás un reto de lógica para conseguir gemas. ¡Cuando completes las 4 misiones, abrirás el cofre de campeona de olimpiadas!</p>
+    </section>
+    <section class="estado">
+      <div class="tarjeta">⭐ Puntos: <span id="puntos">0</span></div>
+      <div class="tarjeta">💎 Gemas: <span id="gemas">0</span>/4</div>
+      <div class="tarjeta">🎯 Meta: Resolver 4 retos</div>
+    </section>
+    <details open>
+      <summary>Misión 1: El puente de los números</summary>
+      <div class="mision" data-mision="1" data-respuesta="15">
+        <p class="pregunta">Si 3 gatos cazan 3 ratones en 3 minutos, ¿cuántos ratones cazan 5 gatos en 3 minutos?</p>
+        <input class="respuesta-num" type="number" placeholder="Escribe tu respuesta" />
+        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
+        <p class="pista">Piensa en cuántos ratones caza 1 gato en 3 minutos.</p>
+        <p class="resultado"></p>
+      </div>
+    </details>
+    <details>
+      <summary>Misión 2: El bosque de patrones</summary>
+      <div class="mision" data-mision="2" data-respuesta="B">
+        <p class="pregunta">¿Qué letra sigue en la secuencia? A, C, F, J, O, ...</p>
+        <div class="opciones">
+          <label><input type="radio" name="m2" value="A" /> A) S</label>
+          <label><input type="radio" name="m2" value="B" /> B) U</label>
+          <label><input type="radio" name="m2" value="C" /> C) V</label>
+        </div>
+        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
+        <p class="pista">Los saltos entre letras son +2, +3, +4, +5...</p>
+        <p class="resultado"></p>
+      </div>
+    </details>
+    <details>
+      <summary>Misión 3: La cueva de balanzas</summary>
+      <div class="mision" data-mision="3" data-respuesta="12">
+        <p class="pregunta">Una caja pesa 10 kg más la mitad de su propio peso. ¿Cuánto pesa la caja?</p>
+        <input class="respuesta-num" type="number" placeholder="Escribe tu respuesta" />
+        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
+        <p class="pista">Si llamas x al peso, se cumple x = 10 + x/2.</p>
+        <p class="resultado"></p>
+      </div>
+    </details>
+    <details>
+      <summary>Misión 4: El código del castillo</summary>
+      <div class="mision" data-mision="4" data-respuesta="C">
+        <p class="pregunta">Tres amigas (Ana, Beto y Cami) tienen una mascota distinta: gato, perro y pez. Ana no tiene perro. Cami no tiene pez. Beto no tiene gato. ¿Quién tiene el pez?</p>
+        <div class="opciones">
+          <label><input type="radio" name="m4" value="A" /> A) Ana</label>
+          <label><input type="radio" name="m4" value="B" /> B) Beto</label>
+          <label><input type="radio" name="m4" value="C" /> C) Cami</label>
+        </div>
+        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
+        <p class="pista">Prueba combinaciones y descarta con cada condición.</p>
+        <p class="resultado"></p>
+      </div>
+    </details>
+    <section class="final" id="cofreFinal">
+      <h2>🎉 ¡Cofre abierto!</h2>
+      <p>¡Increíble trabajo! Has completado las 4 misiones de lógica. Ya estás entrenando como una campeona olímpica. 🏅</p>
+    </section>
+    <p class="creditos">Hecho con ❤️ para aprender jugando.</p>
+  </main>
+  <script>
+    const puntosEl = document.getElementById("puntos");
+    const gemasEl = document.getElementById("gemas");
+    const cofreFinal = document.getElementById("cofreFinal");
+    let puntos = 0; let gemas = 0;
+    const misionesCompletadas = new Set();
+    function actualizarMarcador() { puntosEl.textContent = puntos; gemasEl.textContent = gemas; if (gemas === 4) { cofreFinal.style.display = "block"; } }
+    document.querySelectorAll(".mision").forEach((mision) => {
+      const btnVerificar = mision.querySelector(".btn-verificar");
+      const btnPista = mision.querySelector(".btn-pista");
+      const resultado = mision.querySelector(".resultado");
+      const pista = mision.querySelector(".pista");
+      const idMision = mision.dataset.mision;
+      const respuestaCorrecta = mision.dataset.respuesta;
+      btnPista.addEventListener("click", () => { pista.style.display = pista.style.display === "block" ? "none" : "block"; });
+      btnVerificar.addEventListener("click", () => {
+        let respuestaUsuario = "";
+        const inputNumero = mision.querySelector(".respuesta-num");
+        const radioSeleccionado = mision.querySelector("input[type='radio']:checked");
+        if (inputNumero) { respuestaUsuario = inputNumero.value.trim(); } else if (radioSeleccionado) { respuestaUsuario = radioSeleccionado.value; }
+        if (!respuestaUsuario) { resultado.textContent = "Elige o escribe una respuesta antes de verificar."; resultado.className = "resultado error"; return; }
+        if (respuestaUsuario === respuestaCorrecta) {
+          if (!misionesCompletadas.has(idMision)) { misionesCompletadas.add(idMision); puntos += 25; gemas += 1; actualizarMarcador(); }
+          resultado.textContent = "¡Correcto! Ganaste una gema."; resultado.className = "resultado ok";
+        } else { resultado.textContent = "Casi... revisa el reto y vuelve a intentar."; resultado.className = "resultado error"; }
+      });
+    });
+  </script>
+</body>
+  </html>
