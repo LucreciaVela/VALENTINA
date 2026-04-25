@@ -3,135 +3,553 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aventura Matemática - Olimpiadas de Lógica</title>
+  <title>Aventura del Osito en el Bosque</title>
   <style>
     :root {
-      --fondo: #f6fbff;
-      --tarjeta: #ffffff;
-      --primario: #3a86ff;
-      --secundario: #8338ec;
-      --acento: #ffbe0b;
-      --texto: #123;
-      --ok: #0f9d58;
-      --error: #d93025;
+      --fondo: #cce8ff;
+      --panel: #ffffffee;
+      --primario: #2f80ed;
+      --secundario: #27ae60;
+      --acento: #f2c94c;
+      --texto: #1f2d3d;
+      --bloqueado: #a0aec0;
     }
+
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Trebuchet MS", "Segoe UI", sans-serif; background: radial-gradient(circle at top, #ffffff 0%, var(--fondo) 50%, #e7f2ff 100%); color: var(--texto); min-height: 100vh; }
-    .contenedor { max-width: 900px; margin: 0 auto; padding: 24px; }
-    .hero { background: linear-gradient(135deg, var(--primario), var(--secundario)); color: #fff; padding: 24px; border-radius: 20px; box-shadow: 0 10px 25px rgba(58,134,255,0.25); margin-bottom: 20px; }
-    .hero h1 { margin-top: 0; font-size: 1.9rem; }
-    .estado { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 16px 0 22px; }
-    .estado .tarjeta { background: var(--tarjeta); border-radius: 14px; padding: 14px; border: 2px solid #e6f0ff; font-weight: bold; }
-    details { background: var(--tarjeta); border: 2px solid #d9e7ff; border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
-    summary { cursor: pointer; list-style: none; padding: 16px; font-size: 1.1rem; font-weight: bold; background: linear-gradient(90deg, #f5f9ff, #ffffff); border-bottom: 1px solid #edf3ff; }
-    summary::before { content: "🧭 "; }
-    .mision { padding: 16px; }
-    .pregunta { font-weight: bold; margin-bottom: 10px; }
-    .opciones { display: grid; gap: 8px; margin-bottom: 12px; }
-    label { display: flex; gap: 8px; align-items: center; background: #f8fbff; border-radius: 10px; padding: 8px 10px; border: 1px solid #e7efff; }
-    .respuesta-num { width: 100%; max-width: 220px; padding: 8px; border-radius: 10px; border: 1px solid #c3d7ff; font-size: 1rem; margin-bottom: 12px; }
-    button { background: var(--primario); color: white; border: none; border-radius: 999px; padding: 9px 16px; font-weight: bold; cursor: pointer; margin-right: 8px; }
-    button:hover { filter: brightness(1.06); }
-    .pista { background: #fff8e3; border-left: 4px solid var(--acento); padding: 8px 10px; border-radius: 10px; margin-top: 10px; display: none; }
-    .resultado { margin-top: 10px; font-weight: bold; min-height: 24px; }
-    .ok { color: var(--ok); }
-    .error { color: var(--error); }
-    .final { background: #f3fff8; border: 2px dashed #8ad5a9; border-radius: 14px; padding: 14px; margin-top: 16px; display: none; }
-    .creditos { text-align: center; margin-top: 20px; opacity: 0.75; font-size: 0.95rem; }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background: linear-gradient(#e8f6ff, #dff1ff);
+      color: var(--texto);
+    }
+
+    .contenedor {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      background: linear-gradient(130deg, #56ccf2, #2f80ed);
+      color: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(47, 128, 237, 0.25);
+      margin-bottom: 16px;
+    }
+
+    .marcador {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 2px solid #d5e7ff;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+    }
+
+    .pantalla {
+      display: none;
+      background: var(--panel);
+      border-radius: 16px;
+      border: 2px solid #dcecff;
+      padding: 16px;
+    }
+
+    .pantalla.activa { display: block; }
+
+    .mapa {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      padding-top: 8px;
+    }
+
+    .nivel-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 0 rgba(0,0,0,.12);
+      transition: transform .12s ease;
+      text-align: left;
+    }
+
+    .nivel-btn:hover:not(:disabled) { transform: translateY(-2px); }
+
+    .nivel-btn.desbloqueado { background: linear-gradient(180deg, #6fcf97, #27ae60); }
+    .nivel-btn.completado { background: linear-gradient(180deg, #f2c94c, #f2994a); }
+    .nivel-btn.bloqueado { background: linear-gradient(180deg, #c6d2df, #9aacbf); cursor: not-allowed; }
+
+    #juegoCanvas {
+      width: 100%;
+      max-width: 920px;
+      height: auto;
+      border-radius: 14px;
+      border: 2px solid #a6d2ff;
+      background: #dff4ff;
+      display: block;
+      margin: 10px auto;
+    }
+
+    .controles {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--primario);
+      color: white;
+    }
+
+    .secundario { background: var(--secundario); }
+
+    #mensajeEstado { min-height: 28px; font-weight: 700; margin-top: 8px; }
+
+    .acertijo {
+      margin-top: 14px;
+      border-top: 2px dashed #b7d7ff;
+      padding-top: 12px;
+      display: none;
+    }
+
+    .acertijo input {
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #9ec5ff;
+      width: 240px;
+      max-width: 100%;
+      margin-right: 8px;
+    }
+
+    .pie { opacity: .75; margin-top: 16px; text-align: center; }
   </style>
 </head>
 <body>
   <main class="contenedor">
     <section class="hero">
-      <h1>🏰 Aventura Matemática de la Isla Lógica</h1>
-      <p>Hola, exploradora. En cada misión resolverás un reto de lógica para conseguir gemas. ¡Cuando completes las 4 misiones, abrirás el cofre de campeona de olimpiadas!</p>
+      <h1>🧸 Bosque Saltarín del Osito</h1>
+      <p>Estilo aventura 2D: salta obstáculos, recoge flores para ganar puntos y resuelve acertijos para desbloquear el siguiente nivel del mapa tipo Mario.</p>
     </section>
-    <section class="estado">
-      <div class="tarjeta">⭐ Puntos: <span id="puntos">0</span></div>
-      <div class="tarjeta">💎 Gemas: <span id="gemas">0</span>/4</div>
-      <div class="tarjeta">🎯 Meta: Resolver 4 retos</div>
+
+    <section class="marcador">
+      <div class="card">🌸 Flores: <span id="flores">0</span></div>
+      <div class="card">⭐ Puntos: <span id="puntos">0</span></div>
+      <div class="card">🗺️ Nivel: <span id="nivelActual">Mapa</span></div>
     </section>
-    <details open>
-      <summary>Misión 1: El puente de los números</summary>
-      <div class="mision" data-mision="1" data-respuesta="15">
-        <p class="pregunta">Si 3 gatos cazan 3 ratones en 3 minutos, ¿cuántos ratones cazan 5 gatos en 3 minutos?</p>
-        <input class="respuesta-num" type="number" placeholder="Escribe tu respuesta" />
-        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
-        <p class="pista">Piensa en cuántos ratones caza 1 gato en 3 minutos.</p>
-        <p class="resultado"></p>
-      </div>
-    </details>
-    <details>
-      <summary>Misión 2: El bosque de patrones</summary>
-      <div class="mision" data-mision="2" data-respuesta="B">
-        <p class="pregunta">¿Qué letra sigue en la secuencia? A, C, F, J, O, ...</p>
-        <div class="opciones">
-          <label><input type="radio" name="m2" value="A" /> A) S</label>
-          <label><input type="radio" name="m2" value="B" /> B) U</label>
-          <label><input type="radio" name="m2" value="C" /> C) V</label>
-        </div>
-        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
-        <p class="pista">Los saltos entre letras son +2, +3, +4, +5...</p>
-        <p class="resultado"></p>
-      </div>
-    </details>
-    <details>
-      <summary>Misión 3: La cueva de balanzas</summary>
-      <div class="mision" data-mision="3" data-respuesta="12">
-        <p class="pregunta">Una caja pesa 10 kg más la mitad de su propio peso. ¿Cuánto pesa la caja?</p>
-        <input class="respuesta-num" type="number" placeholder="Escribe tu respuesta" />
-        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
-        <p class="pista">Si llamas x al peso, se cumple x = 10 + x/2.</p>
-        <p class="resultado"></p>
-      </div>
-    </details>
-    <details>
-      <summary>Misión 4: El código del castillo</summary>
-      <div class="mision" data-mision="4" data-respuesta="C">
-        <p class="pregunta">Tres amigas (Ana, Beto y Cami) tienen una mascota distinta: gato, perro y pez. Ana no tiene perro. Cami no tiene pez. Beto no tiene gato. ¿Quién tiene el pez?</p>
-        <div class="opciones">
-          <label><input type="radio" name="m4" value="A" /> A) Ana</label>
-          <label><input type="radio" name="m4" value="B" /> B) Beto</label>
-          <label><input type="radio" name="m4" value="C" /> C) Cami</label>
-        </div>
-        <div><button class="btn-verificar">Verificar</button><button class="btn-pista" type="button">Pista</button></div>
-        <p class="pista">Prueba combinaciones y descarta con cada condición.</p>
-        <p class="resultado"></p>
-      </div>
-    </details>
-    <section class="final" id="cofreFinal">
-      <h2>🎉 ¡Cofre abierto!</h2>
-      <p>¡Increíble trabajo! Has completado las 4 misiones de lógica. Ya estás entrenando como una campeona olímpica. 🏅</p>
+
+    <section id="pantallaMapa" class="pantalla activa">
+      <h2>Mapa de Aventuras</h2>
+      <p>Selecciona una aventura. Algunas rutas están bloqueadas hasta superar el acertijo del nivel anterior.</p>
+      <div id="mapaNiveles" class="mapa"></div>
     </section>
-    <p class="creditos">Hecho con ❤️ para aprender jugando.</p>
+
+    <section id="pantallaJuego" class="pantalla">
+      <h2 id="tituloNivel">Aventura</h2>
+      <canvas id="juegoCanvas" width="920" height="360"></canvas>
+      <div class="controles">
+        <button id="btnSaltar">Saltar (Espacio / ↑)</button>
+        <button id="btnVolver" class="secundario">Volver al mapa</button>
+      </div>
+      <p id="mensajeEstado"></p>
+
+      <div id="zonaAcertijo" class="acertijo">
+        <h3>🔐 Acertijo para pasar de nivel</h3>
+        <p id="textoAcertijo"></p>
+        <input id="respuestaAcertijo" type="text" placeholder="Escribe tu respuesta" />
+        <button id="btnResponder" type="button">Validar respuesta</button>
+      </div>
+    </section>
+
+    <p class="pie">Hecho con ❤️ para aprender jugando.</p>
   </main>
+
   <script>
+    const niveles = [
+      {
+        id: 1,
+        nombre: "Nivel 1: Sendero de las Margaritas",
+        distanciaObjetivo: 1900,
+        floresMeta: 5,
+        velocidad: 4,
+        acertijo: {
+          pregunta: "Soy un número par mayor que 10 y menor que 14. ¿Quién soy?",
+          respuesta: "12"
+        }
+      },
+      {
+        id: 2,
+        nombre: "Nivel 2: Troncos del Arroyo",
+        distanciaObjetivo: 2400,
+        floresMeta: 7,
+        velocidad: 4.8,
+        acertijo: {
+          pregunta: "Si hoy es lunes, ¿qué día será en 3 días?",
+          respuesta: "jueves"
+        }
+      },
+      {
+        id: 3,
+        nombre: "Nivel 3: Colina del Búho",
+        distanciaObjetivo: 2900,
+        floresMeta: 9,
+        velocidad: 5.3,
+        acertijo: {
+          pregunta: "Tengo 3 lados iguales, ¿qué figura soy?",
+          respuesta: "triangulo"
+        }
+      },
+      {
+        id: 4,
+        nombre: "Nivel 4: Gran Claro Final",
+        distanciaObjetivo: 3400,
+        floresMeta: 10,
+        velocidad: 5.9,
+        acertijo: {
+          pregunta: "Último reto: ¿cuánto es 5 + 7?",
+          respuesta: "12"
+        }
+      }
+    ];
+
+    const estado = {
+      puntos: 0,
+      flores: 0,
+      nivelActual: null,
+      nivelesDesbloqueados: new Set([1]),
+      nivelesCompletados: new Set()
+    };
+
     const puntosEl = document.getElementById("puntos");
-    const gemasEl = document.getElementById("gemas");
-    const cofreFinal = document.getElementById("cofreFinal");
-    let puntos = 0; let gemas = 0;
-    const misionesCompletadas = new Set();
-    function actualizarMarcador() { puntosEl.textContent = puntos; gemasEl.textContent = gemas; if (gemas === 4) { cofreFinal.style.display = "block"; } }
-    document.querySelectorAll(".mision").forEach((mision) => {
-      const btnVerificar = mision.querySelector(".btn-verificar");
-      const btnPista = mision.querySelector(".btn-pista");
-      const resultado = mision.querySelector(".resultado");
-      const pista = mision.querySelector(".pista");
-      const idMision = mision.dataset.mision;
-      const respuestaCorrecta = mision.dataset.respuesta;
-      btnPista.addEventListener("click", () => { pista.style.display = pista.style.display === "block" ? "none" : "block"; });
-      btnVerificar.addEventListener("click", () => {
-        let respuestaUsuario = "";
-        const inputNumero = mision.querySelector(".respuesta-num");
-        const radioSeleccionado = mision.querySelector("input[type='radio']:checked");
-        if (inputNumero) { respuestaUsuario = inputNumero.value.trim(); } else if (radioSeleccionado) { respuestaUsuario = radioSeleccionado.value; }
-        if (!respuestaUsuario) { resultado.textContent = "Elige o escribe una respuesta antes de verificar."; resultado.className = "resultado error"; return; }
-        if (respuestaUsuario === respuestaCorrecta) {
-          if (!misionesCompletadas.has(idMision)) { misionesCompletadas.add(idMision); puntos += 25; gemas += 1; actualizarMarcador(); }
-          resultado.textContent = "¡Correcto! Ganaste una gema."; resultado.className = "resultado ok";
-        } else { resultado.textContent = "Casi... revisa el reto y vuelve a intentar."; resultado.className = "resultado error"; }
+    const floresEl = document.getElementById("flores");
+    const nivelActualEl = document.getElementById("nivelActual");
+    const pantallaMapa = document.getElementById("pantallaMapa");
+    const pantallaJuego = document.getElementById("pantallaJuego");
+    const mapaNivelesEl = document.getElementById("mapaNiveles");
+    const tituloNivelEl = document.getElementById("tituloNivel");
+    const mensajeEstado = document.getElementById("mensajeEstado");
+    const zonaAcertijo = document.getElementById("zonaAcertijo");
+    const textoAcertijo = document.getElementById("textoAcertijo");
+    const respuestaAcertijo = document.getElementById("respuestaAcertijo");
+
+    const canvas = document.getElementById("juegoCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let juego = null;
+    let frameId = null;
+    let teclas = { salto: false };
+
+    function actualizarMarcador() {
+      puntosEl.textContent = estado.puntos;
+      floresEl.textContent = estado.flores;
+      nivelActualEl.textContent = estado.nivelActual ? `#${estado.nivelActual.id}` : "Mapa";
+    }
+
+    function normalizar(txt) {
+      return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    }
+
+    function mostrarMapa() {
+      pantallaJuego.classList.remove("activa");
+      pantallaMapa.classList.add("activa");
+      estado.nivelActual = null;
+      actualizarMarcador();
+      renderMapa();
+      detenerJuego();
+    }
+
+    function renderMapa() {
+      mapaNivelesEl.innerHTML = "";
+      niveles.forEach((nivel) => {
+        const btn = document.createElement("button");
+        btn.className = "nivel-btn";
+        const desbloqueado = estado.nivelesDesbloqueados.has(nivel.id);
+        const completado = estado.nivelesCompletados.has(nivel.id);
+
+        if (completado) btn.classList.add("completado");
+        else if (desbloqueado) btn.classList.add("desbloqueado");
+        else btn.classList.add("bloqueado");
+
+        btn.disabled = !desbloqueado;
+        btn.innerHTML = `<strong>${nivel.nombre}</strong><br>${completado ? "✅ Completado" : desbloqueado ? "▶️ Jugar" : "🔒 Bloqueado"}`;
+        btn.addEventListener("click", () => iniciarNivel(nivel.id));
+        mapaNivelesEl.appendChild(btn);
       });
+    }
+
+    function crearObjetosNivel(nivel) {
+      const obstaculos = [];
+      const flores = [];
+
+      for (let x = 600; x <= nivel.distanciaObjetivo; x += 270 + Math.random() * 240) {
+        obstaculos.push({ x, y: 285, w: 30 + Math.random() * 20, h: 30 + Math.random() * 36 });
+      }
+
+      for (let x = 350; x <= nivel.distanciaObjetivo; x += 180 + Math.random() * 160) {
+        flores.push({ x, y: 244 - Math.random() * 90, r: 11, tomada: false });
+      }
+
+      return { obstaculos, flores };
+    }
+
+    function iniciarNivel(idNivel) {
+      const nivel = niveles.find((n) => n.id === idNivel);
+      if (!nivel) return;
+
+      pantallaMapa.classList.remove("activa");
+      pantallaJuego.classList.add("activa");
+      zonaAcertijo.style.display = "none";
+      respuestaAcertijo.value = "";
+
+      const objetos = crearObjetosNivel(nivel);
+      estado.nivelActual = nivel;
+      actualizarMarcador();
+
+      juego = {
+        terminado: false,
+        listoAcertijo: false,
+        progreso: 0,
+        nivel,
+        mundo: {
+          obstaculos: objetos.obstaculos,
+          flores: objetos.flores,
+          sueloY: 300
+        },
+        osito: {
+          x: 130,
+          y: 255,
+          w: 45,
+          h: 45,
+          vy: 0,
+          saltando: false
+        },
+        camaraX: 0,
+        floresNivel: 0,
+        frameCount: 0
+      };
+
+      tituloNivelEl.textContent = nivel.nombre;
+      mensajeEstado.textContent = "Corre y salta. Recoge flores para sumar puntos.";
+      loop();
+    }
+
+    function detenerJuego() {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+    }
+
+    function saltar() {
+      if (!juego || juego.terminado) return;
+      const o = juego.osito;
+      if (!o.saltando) {
+        o.vy = -11.8;
+        o.saltando = true;
+      }
+    }
+
+    function colisionRect(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+
+    function actualizar() {
+      const g = juego;
+      if (!g || g.terminado) return;
+
+      g.frameCount += 1;
+      g.progreso += g.nivel.velocidad;
+      g.camaraX = Math.max(0, g.progreso - 180);
+
+      const osito = g.osito;
+      osito.vy += 0.6;
+      osito.y += osito.vy;
+
+      if (osito.y + osito.h >= g.mundo.sueloY) {
+        osito.y = g.mundo.sueloY - osito.h;
+        osito.vy = 0;
+        osito.saltando = false;
+      }
+
+      for (const obstaculo of g.mundo.obstaculos) {
+        const obsRect = { x: obstaculo.x - g.camaraX, y: obstaculo.y, w: obstaculo.w, h: obstaculo.h };
+        if (colisionRect(osito, obsRect)) {
+          estado.puntos = Math.max(0, estado.puntos - 10);
+          actualizarMarcador();
+          mensajeEstado.textContent = "¡Ay! Te chocaste con un obstáculo. -10 puntos";
+          iniciarNivel(g.nivel.id);
+          return;
+        }
+      }
+
+      for (const flor of g.mundo.flores) {
+        if (flor.tomada) continue;
+        const dX = (flor.x - g.camaraX) - (osito.x + osito.w / 2);
+        const dY = flor.y - (osito.y + osito.h / 2);
+        if (Math.hypot(dX, dY) < flor.r + osito.w * 0.35) {
+          flor.tomada = true;
+          g.floresNivel += 1;
+          estado.flores += 1;
+          estado.puntos += 15;
+          actualizarMarcador();
+        }
+      }
+
+      if (g.progreso >= g.nivel.distanciaObjetivo && !g.listoAcertijo) {
+        g.listoAcertijo = true;
+        g.terminado = true;
+        detenerJuego();
+
+        if (g.floresNivel < g.nivel.floresMeta) {
+          mensajeEstado.textContent = `Llegaste al final, pero necesitas ${g.nivel.floresMeta} flores (solo tomaste ${g.floresNivel}). Intenta otra vez.`;
+          setTimeout(() => iniciarNivel(g.nivel.id), 1200);
+          return;
+        }
+
+        textoAcertijo.textContent = g.nivel.acertijo.pregunta;
+        zonaAcertijo.style.display = "block";
+        mensajeEstado.textContent = "¡Meta alcanzada! Resuelve el acertijo para desbloquear la siguiente aventura.";
+      }
+    }
+
+    function dibujarFondo(g) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, "#bce8ff");
+      grad.addColorStop(1, "#e8faff");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#99d37d";
+      ctx.fillRect(0, g.mundo.sueloY, canvas.width, canvas.height - g.mundo.sueloY);
+
+      for (let i = 0; i < 8; i++) {
+        const mx = ((i * 240 - (g.camaraX * 0.35)) % (canvas.width + 250)) - 130;
+        ctx.fillStyle = "#6ea96c";
+        ctx.beginPath();
+        ctx.moveTo(mx, g.mundo.sueloY);
+        ctx.lineTo(mx + 80, 180);
+        ctx.lineTo(mx + 160, g.mundo.sueloY);
+        ctx.fill();
+      }
+    }
+
+    function dibujarOsito(o) {
+      ctx.fillStyle = "#8d6e63";
+      ctx.beginPath();
+      ctx.roundRect(o.x, o.y + 10, o.w, o.h - 10, 10);
+      ctx.fill();
+
+      ctx.fillStyle = "#a98274";
+      ctx.beginPath();
+      ctx.arc(o.x + o.w / 2, o.y + 14, 16, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#2d1e1a";
+      ctx.beginPath();
+      ctx.arc(o.x + 18, o.y + 14, 3, 0, Math.PI * 2);
+      ctx.arc(o.x + 27, o.y + 14, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function dibujar(g) {
+      dibujarFondo(g);
+
+      g.mundo.flores.forEach((flor) => {
+        if (flor.tomada) return;
+        const x = flor.x - g.camaraX;
+        ctx.fillStyle = "#f06292";
+        ctx.beginPath();
+        ctx.arc(x, flor.y, flor.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#f8e16c";
+        ctx.beginPath();
+        ctx.arc(x, flor.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      g.mundo.obstaculos.forEach((obs) => {
+        const x = obs.x - g.camaraX;
+        ctx.fillStyle = "#7b5e57";
+        ctx.fillRect(x, obs.y, obs.w, obs.h);
+      });
+
+      dibujarOsito(g.osito);
+
+      ctx.fillStyle = "#1f2d3d";
+      ctx.font = "bold 16px Trebuchet MS";
+      ctx.fillText(`Flores del nivel: ${g.floresNivel}/${g.nivel.floresMeta}`, 14, 24);
+      ctx.fillText(`Meta: ${Math.min(100, Math.round((g.progreso / g.nivel.distanciaObjetivo) * 100))}%`, 14, 46);
+    }
+
+    function loop() {
+      actualizar();
+      if (juego) dibujar(juego);
+      if (juego && !juego.terminado) {
+        frameId = requestAnimationFrame(loop);
+      }
+    }
+
+    function validarAcertijo() {
+      if (!juego || !juego.listoAcertijo) return;
+      const correcta = normalizar(juego.nivel.acertijo.respuesta);
+      const intento = normalizar(respuestaAcertijo.value);
+
+      if (intento === correcta) {
+        estado.puntos += 60;
+        estado.nivelesCompletados.add(juego.nivel.id);
+        const siguiente = juego.nivel.id + 1;
+        if (siguiente <= niveles.length) estado.nivelesDesbloqueados.add(siguiente);
+
+        mensajeEstado.textContent = `¡Acertijo correcto! ${juego.nivel.nombre} superado.`;
+        zonaAcertijo.style.display = "none";
+        actualizarMarcador();
+
+        if (estado.nivelesCompletados.size === niveles.length) {
+          alert("🏆 ¡Terminaste todas las aventuras del osito! Eres campeona del bosque.");
+        }
+
+        setTimeout(mostrarMapa, 850);
+      } else {
+        mensajeEstado.textContent = "Respuesta incorrecta. Piensa de nuevo y vuelve a intentar.";
+      }
+    }
+
+    document.getElementById("btnSaltar").addEventListener("click", saltar);
+    document.getElementById("btnVolver").addEventListener("click", mostrarMapa);
+    document.getElementById("btnResponder").addEventListener("click", validarAcertijo);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space" || e.code === "ArrowUp") {
+        e.preventDefault();
+        if (!teclas.salto) saltar();
+        teclas.salto = true;
+      }
     });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.code === "Space" || e.code === "ArrowUp") teclas.salto = false;
+    });
+
+    renderMapa();
+    actualizarMarcador();
   </script>
 </body>
-  </html>
+</html>
